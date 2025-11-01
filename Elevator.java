@@ -18,8 +18,13 @@ public class Elevator {
         this.maxFloor = maxFloor;
         this.speed = speed;
     }
-    
+
+
+    // This method simulates a person inside the elevator that is "pressing a button" for the floor they want to go to
     public void addDestination(int floor) {
+
+
+        // It first makes sure the floor is valid (within the range of floors 1-10 and not the floor the person is already on)
         if (floor < minFloor || floor > maxFloor) {
             System.out.println("Invalid floor: " + floor);
             return;
@@ -29,6 +34,7 @@ public class Elevator {
             return;
         }
         if (!destinationQueue.contains(floor)) {
+        // Then, it adds the new destination to the "destinationQueue" list
             destinationQueue.add(floor);
             System.out.println("Added destination: Floor " + floor);
         } else {
@@ -36,12 +42,15 @@ public class Elevator {
         }
     }
     
+    // This method simuates a person outside the elevator that wants to go on the elevator
+    // takes in the floor as a parameter (same as addDestination()) but also has direction (either Up or Down)
     public void addPickupRequest(int floor, Direction direction) {
+        // First, the function checks if the floor is valid
         if (floor < minFloor || floor > maxFloor) {
             System.out.println("Invalid floor: " + floor);
             return;
         }
-        
+        // Makes sure the request hasn't been requested already
         for (ElevatorRequest req : pickupQueue) {
             if (req.floor == floor && req.direction == direction) {
                 System.out.println("Request already exists for " + req);
@@ -49,12 +58,15 @@ public class Elevator {
             }
         }
         
+        // After checking validity, an ElevatorRequest object is created and added to the pickupQueue list
         ElevatorRequest request = new ElevatorRequest(floor, direction);
         pickupQueue.add(request);
         System.out.println("Added pickup request: " + request);
     }
     
+    // This function moves the elevator
     public void step() {
+        // If there are no people inside or outside the elevator making requests, then the state of the elevator is "IDLE"
         if (destinationQueue.isEmpty() && pickupQueue.isEmpty()) {
             currentDirection = Direction.IDLE;
             return;
@@ -67,6 +79,7 @@ public class Elevator {
             return;
         }
         
+        // Current floor increases or decreases depending on the next floor and the current floor
         if (nextFloor > currentFloor) {
             currentDirection = Direction.UP;
             currentFloor++;
@@ -80,7 +93,7 @@ public class Elevator {
         if (currentDirection != Direction.IDLE) {
             System.out.println("Elevator moving " + currentDirection + " to floor " + currentFloor);
         }        
-        checkArrival();
+        checkArrival(); // Checks to see if the elevator has reached the correct floor 
         
         try {
             Thread.sleep(speed);
@@ -89,15 +102,26 @@ public class Elevator {
         }
     }
     
+    // This method gets the next destination the elevator should go to
+    // The priority is:
+    // 1: The same direction the elevator is moving in
+    // 2: The opposite direction the elevator is moving in
+    // 3: Any destination a person inside the elevator wants to go to
+    // 4: Any pickup triggered by a person outside the elevator
     private Integer getNextDestination() {
         if (currentDirection == Direction.UP || currentDirection == Direction.IDLE) {
             Integer upDestination = getNextFloorInDirection(Direction.UP);
-            if (upDestination != null) return upDestination;
+            if (upDestination != null) {
+                return upDestination;
+            }
+        
         }
         
         if (currentDirection == Direction.DOWN || currentDirection == Direction.IDLE) {
             Integer downDestination = getNextFloorInDirection(Direction.DOWN);
-            if (downDestination != null) return downDestination;
+            if (downDestination != null) { 
+                return downDestination;
+            }
         }
         
         if (!destinationQueue.isEmpty()) {
@@ -111,14 +135,18 @@ public class Elevator {
         return null;
     }
     
+    // This methods finds the closest floor to go to based on the requests from people inside and outside the elevator
     private Integer getNextFloorInDirection(Direction dir) {
         Integer closest = null;
         
+        // If the elevator is currently going up, it will check to make sure the floor requested is greater than the current floor
         for (Integer floor : destinationQueue) {
             if (dir == Direction.UP && floor >= currentFloor) {
                 if (closest == null || floor < closest) {
                     closest = floor;
                 }
+
+        // If the elevator is currently going down, it will check to make sure the floor requested is less than the current floor
             } else if (dir == Direction.DOWN && floor <= currentFloor) {
                 if (closest == null || floor > closest) {
                     closest = floor;
@@ -126,6 +154,8 @@ public class Elevator {
             }
         }
         
+        // To avoid the elevator going up and down randomly, I made it so that it only picks up people from the outside if they want to go in the 
+        // same direction the elevator is currently going 
         for (ElevatorRequest req : pickupQueue) {
             if (dir == Direction.UP && req.floor >= currentFloor && req.direction == Direction.UP) {
                 if (closest == null || req.floor < closest) {
@@ -141,6 +171,7 @@ public class Elevator {
         return closest;
     }
     
+    // Checks to see if the elevator has reached its destination
     private void checkArrival() {
         if (destinationQueue.contains(currentFloor)) {
             destinationQueue.remove(Integer.valueOf(currentFloor));
@@ -151,7 +182,6 @@ public class Elevator {
         while (iter.hasNext()) {
             ElevatorRequest req = iter.next();
             if (req.floor == currentFloor) {
-                // Pick up if: directions match, elevator is idle, or we're at a terminal floor
                 boolean shouldPickup = req.direction == currentDirection || 
                                       currentDirection == Direction.IDLE ||
                                       (currentFloor == minFloor && req.direction == Direction.UP) ||
@@ -166,9 +196,9 @@ public class Elevator {
     }
     
     public void displayStatus() {
-        System.out.println("\n--- ELEVATOR STATUS ---");
+        System.out.println("\n" + "-------------- ELEVATOR STATUS --------------");
         System.out.println("Current Floor: " + currentFloor);
-        System.out.println("Direction: " + currentDirection);
+        System.out.println("Direction the elevator is moving in: " + currentDirection);
         System.out.println("Destinations: " + (destinationQueue.isEmpty() ? "None" : destinationQueue));
         System.out.println("Pickup Requests: " + (pickupQueue.isEmpty() ? "None" : pickupQueue));
         System.out.println("----------------------\n");

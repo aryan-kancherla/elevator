@@ -6,10 +6,12 @@ public class ElevatorSimulation {
     private static final int SPEED_MS = 1000;
     
     public static void main(String[] args) {
+
+        // Main function that is ran to starts the simulation. It starts by creating a fresh, new elevator
         Scanner scanner = new Scanner(System.in);
         Elevator elevator = new Elevator(MIN_FLOOR, MAX_FLOOR, SPEED_MS);
         
-        System.out.println("=== ELEVATOR SIMULATION ===");
+        System.out.println(" ---------------- ELEVATOR SIMULATION ---------------------");
         System.out.println("Building: Floors " + MIN_FLOOR + " to " + MAX_FLOOR);
         System.out.println();
         
@@ -31,17 +33,19 @@ public class ElevatorSimulation {
             
             String input = scanner.nextLine().trim();
             
+
+            // Gives the user a couple of options to interact with the elevator simulation 
             switch (input.toLowerCase()) {
-                case "1":
+                case "1": // Entering "1" simulates a person being inside the elevator and pressing a button to move
                     handleDestinationRequest(scanner, elevator);
                     break;
-                case "2":
+                case "2": // Entering "2" simulates a person outside the elevator that is calling the elevator to their floor
                     handlePickupRequest(scanner, elevator);
                     break;
-                case "3":
+                case "3": // Entering "3" shows what the current status of the elevator is (floor, moving/not moving, etc.)
                     elevator.displayStatus();
                     break;
-                case "4":
+                case "4": // Entering "4" ends the program
                     running = false;
                     break;
                 default:
@@ -55,7 +59,10 @@ public class ElevatorSimulation {
     }
     
     private static void printMenu() {
-        System.out.println("\n--- MENU ---");
+
+        // A nice "user manual" with instructions on how to interact with the elevator simulation
+
+        System.out.println("\n" + "----------------- MENU -----------------");
         System.out.println("1. Press floor button inside elevator");
         System.out.println("2. Call elevator from a floor");
         System.out.println("3. Display elevator status");
@@ -77,7 +84,7 @@ public class ElevatorSimulation {
         System.out.print("Enter floor to call from (" + MIN_FLOOR + "-" + MAX_FLOOR + "): ");
         try {
             int floor = Integer.parseInt(scanner.nextLine().trim());
-            System.out.print("Direction (U for up, D for down): ");
+            System.out.print("Direction (Enter 'U' for up or 'D' for down): ");
             String dirInput = scanner.nextLine().trim().toUpperCase();
             
             Direction direction;
@@ -86,13 +93,13 @@ public class ElevatorSimulation {
             } else if (dirInput.equals("D")) {
                 direction = Direction.DOWN;
             } else {
-                System.out.println("Invalid direction. Use U or D.");
+                System.out.println("Invalid direction. Use U (Up) or D (Down).");
                 return;
             }
             
             elevator.addPickupRequest(floor, direction);
         } catch (NumberFormatException e) {
-            System.out.println("Invalid input. Please enter a number.");
+            System.out.println("Invalid input. Please enter a valid number.");
         }
     }
 }
